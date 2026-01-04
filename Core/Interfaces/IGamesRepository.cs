@@ -9,6 +9,6 @@ namespace Millionaire.Core.Interfaces
 {
     public interface IGamesRepository : IBaseRepository<Games, Guid>
     {
-        
+        Task<IReadOnlyList<Games>?> GetByActiveAsync(bool active, CancellationToken ct);
     }
 }

@@ -2,6 +2,10 @@
 using Telegram.Bot.Types;
 using Telegram.Bot;
 using System.Diagnostics;
+using Millionaire.Core.Enteties;
+using Millionaire.Core.Interfaces;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Millionaire.TelegramBot.Handlers
 {
@@ -10,8 +14,9 @@ namespace Millionaire.TelegramBot.Handlers
         public long ChatId { get; protected set; }
         public long UserId { get; protected set; }
         public int MessageId { get; protected set; }
-        public User? User { get; protected set; } 
+        public User? TelegramUser { get; protected set; } 
         public string? Text { get; protected set; } 
+        public Users? User { get; protected set; }
 
 
         protected BaseHandler()
@@ -43,10 +48,10 @@ namespace Millionaire.TelegramBot.Handlers
         {
             try
             {
-                (ChatId, UserId, MessageId, Text, User) = GetMessageInfo(update);
+                (ChatId, UserId, MessageId, Text, TelegramUser) = GetMessageInfo(update);
 
                 // Проверяем, что получили валидные данные
-                return ChatId != 0 && UserId != 0 && User != null;
+                return ChatId != 0 && UserId != 0 && TelegramUser != null;
             }
 
             catch
@@ -54,7 +59,5 @@ namespace Millionaire.TelegramBot.Handlers
                 return false;
             }
         }
-
-
     }
 }

@@ -13,5 +13,10 @@ namespace Millionaire.Services.Services
         public GamesService(IGamesRepository repository) : base(repository)
         {
         }
+
+        public async Task<IReadOnlyList<Games>?> GetByActiveAsync(bool active, CancellationToken ct)
+        {
+            return await _repository.GetByActiveAsync(active, ct);
+        }
     }
 }

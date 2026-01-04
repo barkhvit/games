@@ -9,5 +9,6 @@ namespace Millionaire.Core.Interfaces
 {
     public interface IGamesService : IBaseService<Games, Guid>
     {
+        Task<IReadOnlyList<Games>?> GetByActiveAsync(bool active, CancellationToken ct);
     }
 }

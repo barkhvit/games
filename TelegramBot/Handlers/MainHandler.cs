@@ -42,8 +42,7 @@ namespace Millionaire.TelegramBot.Handlers
                 }
 
                 //регистрируем пользователя или обновляем пользователя
-                await RegistrationOrUpdateUser(update, ct);
-
+                User = await RegistrationOrUpdateUser(update, ct);
 
                 //в зависимости от типа Update используем нужный обработчик
                 switch (update.Type)
@@ -73,11 +72,11 @@ namespace Millionaire.TelegramBot.Handlers
             await Task.CompletedTask;
         }
 
-        private async Task RegistrationOrUpdateUser(Update update, CancellationToken ct)
+        private async Task<Users?> RegistrationOrUpdateUser(Update update, CancellationToken ct)
         {
             string? username = null;
-            if (User != null)
-                username = User.Username;
+            if (TelegramUser != null)
+                username = TelegramUser.Username;
 
             var user = new Users()
             {
@@ -88,8 +87,11 @@ namespace Millionaire.TelegramBot.Handlers
             };
 
             var u = await _usersService.AddOrUpdateAsync(user, ct);
+
             if(u!=null)
                 _logger.LogInformation($"{u.LastVisited}, user:{u.TelegramId}, текст:{Text}");
+
+            return u;
         }
     }
 }

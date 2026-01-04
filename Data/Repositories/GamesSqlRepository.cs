@@ -48,6 +48,18 @@ namespace Millionaire.Data.Repositories
             return g == null ? null : ModelMapper.MapFromModel(g);
         }
 
+        public async Task<IReadOnlyList<Games>?> GetByActiveAsync(bool active, CancellationToken ct)
+        {
+            using var context = _factory.CreateDataContext();
+            var result = await context.games
+                .LoadWith(g => g.User)
+                .Where(g => g.IsActive == active)
+                .Select(g => ModelMapper.MapFromModel(g))
+                .ToListAsync(ct);
+
+            return result == null ? null : result;
+        }
+
         // UPDATE
         public async Task<int> UpdateAsync(Games game, CancellationToken ct)
         {

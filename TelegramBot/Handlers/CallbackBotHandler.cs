@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Millionaire.Core.DTOs;
+using Millionaire.Core.Interfaces;
 using Millionaire.GamesManager.Enums;
 using Millionaire.GamesManager.Manager;
 using Millionaire.TelegramBot.Views.Games;
@@ -25,16 +26,18 @@ namespace Millionaire.TelegramBot.Handlers
         private readonly GamesMainMenuView _gamesMainMenuView;
         private readonly MonopolyMainMenuView _monopolyMainMenuView;
         private readonly GameFabric _gameFabric;
+        private readonly IUsersService _usersService;
 
         public CallbackBotHandler(ILogger<CallbackBotHandler> logger, MainMenuView mainMenuView,
             GamesMainMenuView gamesMainMenuView, MonopolyMainMenuView monopolyMainMenuView,
-            GameFabric gameFabric)
+            GameFabric gameFabric, IUsersService usersService)
         {
             _logger = logger;
             _mainMenuView = mainMenuView;
             _gamesMainMenuView = gamesMainMenuView;
             _monopolyMainMenuView = monopolyMainMenuView;
             _gameFabric = gameFabric;
+            _usersService = usersService;
         }
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
@@ -53,17 +56,24 @@ namespace Millionaire.TelegramBot.Handlers
 
                 var dto = Dto.FromTelegramUpdate(update);
 
-                switch (callBackDto.Object)
+                //получаем пользователя
+                if(update.CallbackQuery != null)
                 {
-                    case nameof(Dto_Objects.MainMenuView): await _mainMenuView.Show(update, ct); break;
-                    case nameof(Dto_Objects.GamesMainMenuView): await _gamesMainMenuView.Show(update, ct); break;
-                    case nameof(Dto_Objects.MonopolyMainMenuView): await _monopolyMainMenuView.Show(update, ct); break;
-                    case nameof(Dto_Objects.CreateGameCommands): await _gameFabric.CreateAsync(callBackDto.Action, dto, ct); break;
-
-                    default: _logger.LogInformation($"Нет подходящего обработчика в CallbackBotHandler.HandleUpdateAsync для {Text}"); break;
+                    User = await _usersService.GetByTelegramIdAsync(update.CallbackQuery.From.Id, ct);
                 }
 
-                await Task.CompletedTask;
+                if(User != null)
+                {
+                    switch (callBackDto.Object)
+                    {
+                        case nameof(Dto_Objects.MainMenuView): await _mainMenuView.Show(update, ct); break;
+                        case nameof(Dto_Objects.GamesMainMenuView): await _gamesMainMenuView.Show(update, ct); break;
+                        case nameof(Dto_Objects.MonopolyMainMenuView): await _monopolyMainMenuView.Show(update, ct); break;
+                        case nameof(Dto_Objects.CreateGameCommands): await _gameFabric.CreateAsync(callBackDto.Action, User.Id, ct); break;
+
+                        default: _logger.LogInformation($"Нет подходящего обработчика в CallbackBotHandler.HandleUpdateAsync для {Text}"); break;
+                    }
+                }
             }
             catch(Exception ex)
             {

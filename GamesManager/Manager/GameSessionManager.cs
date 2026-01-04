@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Millionaire.Core.Enteties;
 using Millionaire.GamesManager.Enums;
 using System;
 using System.Collections.Concurrent;
@@ -38,20 +39,23 @@ namespace Millionaire.GamesManager.Manager
             _logger.LogInformation("Менеджер игровых сессий остановлен");
         }
 
-        public Guid StartNewSession(enNamesOfGames namesOfGames)
+        public Guid StartNewSession(Games games)
         {
-            var sessionId = Guid.NewGuid();
+            //проверить в словаре, может игра уже запущена
+            if (!_sessions.TryGetValue(games.Id, out var sessionData))
+            {
+                //если нет, то создаем сессию
+                var session = new GameSession(games,
+                    _serviceProvider.GetRequiredService<ILogger<GameSession>>());
 
-            var session = new GameSession(sessionId,
-                _serviceProvider.GetRequiredService<ILogger<GameSession>>(), namesOfGames);
+                // Запускаем сессию в фоновом режиме
+                var sessionTask = session.StartAsync(CancellationToken.None);
 
-            // Запускаем сессию в фоновом режиме
-            var sessionTask = session.StartAsync(CancellationToken.None);
-
-            _sessions.TryAdd(sessionId, (session, sessionTask));
-            _logger.LogInformation($"Создана новая игровая сессия: {sessionId}");
-
-            return sessionId;
+                //добавляется в словарь
+                _sessions.TryAdd(games.Id, (session, sessionTask));
+                _logger.LogInformation($"Создана новая игровая сессия: {games.Id}");
+            }
+            return games.Id;
         }
 
         public async Task StopSessionAsync(Guid sessionId)

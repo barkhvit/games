@@ -111,12 +111,14 @@ namespace Millionaire
             }
 
             //GamesManager
+            services.AddSingleton<GameSessionManager>();
             services.AddHostedService<GameSessionManager>();
             services.AddTransient<GameSession>();
             services.AddScoped<GameFabric>();
 
             // фоновый сервис для бота
             services.AddHostedService<BotBackgroundService>();
+            services.AddHostedService<GamesManagerBackGroundService>();
         }
     }
 }

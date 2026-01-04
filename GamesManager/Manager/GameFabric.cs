@@ -30,13 +30,12 @@ namespace Millionaire.GamesManager.Manager
             _messageService = messageService;
         }
 
-        public async Task CreateAsync(string namesOfGames, Dto dto, CancellationToken ct)
+        public async Task CreateAsync(string namesOfGames, Guid UserId, CancellationToken ct)
         {
             try
             {
-
                 //получаем пользователя
-                var user = await GetUser(dto, ct);
+                var user = await _usersService.GetByIdAsync(UserId, ct);
 
                 //получаем тип игры
                 enNamesOfGames _namesOfGames = namesOfGames switch
@@ -61,7 +60,7 @@ namespace Millionaire.GamesManager.Manager
                     var n = await _gamesService.AddAsync(game,ct);
 
                     //отправляем сообщение пользователю
-                    await _messageService.SendMessage(Dto dto, $"Игра {game.Name} создана.", ct);
+                    await _messageService.SendMessage(UserId, $"Игра {game.Name} создана.", ct);
                 }
             }
             catch(Exception ex)
@@ -70,11 +69,5 @@ namespace Millionaire.GamesManager.Manager
             }
         }
 
-        private async Task<Users?> GetUser(Dto dto, CancellationToken ct)
-        {
-
-
-            throw new NotImplementedException();
-        }
     }
 }

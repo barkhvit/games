@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Millionaire.Core.Enteties;
 using Millionaire.GamesManager.Enums;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,12 @@ namespace Millionaire.GamesManager.Manager
         private readonly CancellationTokenSource _cts;
         private readonly enNamesOfGames _namesOfGames;
 
-        public GameSession(Guid id, ILogger<GameSession> logger, enNamesOfGames namesOfGames)
+        public GameSession(Games games, ILogger<GameSession> logger)
         {
-            _id = id;
+            _id = games.Id;
             _logger = logger;
             _cts = new CancellationTokenSource();
-            _namesOfGames = namesOfGames;
+            _namesOfGames = games.TypeOfGame;
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {

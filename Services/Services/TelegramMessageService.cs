@@ -18,7 +18,7 @@ namespace Millionaire.Services.Services
             _usersService = usersService;
             _botClient = botClient;
         }
-        public async Task SendMessage(Dto dto, string Text, CancellationToken ct)
+        public async Task SendMessage(Guid Id, string Text, CancellationToken ct)
         {
             var user = await _usersService.GetByIdAsync(Id, ct);
 
