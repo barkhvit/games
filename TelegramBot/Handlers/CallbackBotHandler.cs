@@ -27,10 +27,11 @@ namespace Millionaire.TelegramBot.Handlers
         private readonly MonopolyMainMenuView _monopolyMainMenuView;
         private readonly GameFabric _gameFabric;
         private readonly IUsersService _usersService;
+        private readonly RequestsToUsers _requestsToUsers;
 
         public CallbackBotHandler(ILogger<CallbackBotHandler> logger, MainMenuView mainMenuView,
             GamesMainMenuView gamesMainMenuView, MonopolyMainMenuView monopolyMainMenuView,
-            GameFabric gameFabric, IUsersService usersService)
+            GameFabric gameFabric, IUsersService usersService, RequestsToUsers requestsToUsers)
         {
             _logger = logger;
             _mainMenuView = mainMenuView;
@@ -38,6 +39,7 @@ namespace Millionaire.TelegramBot.Handlers
             _monopolyMainMenuView = monopolyMainMenuView;
             _gameFabric = gameFabric;
             _usersService = usersService;
+            _requestsToUsers = requestsToUsers;
         }
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken ct)
@@ -70,6 +72,7 @@ namespace Millionaire.TelegramBot.Handlers
                         case nameof(Dto_Objects.GamesMainMenuView): await _gamesMainMenuView.Show(update, ct); break;
                         case nameof(Dto_Objects.MonopolyMainMenuView): await _monopolyMainMenuView.Show(update, ct); break;
                         case nameof(Dto_Objects.CreateGameCommands): await _gameFabric.CreateAsync(callBackDto.Action, User.Id, ct); break;
+                        case nameof(Dto_Objects.Request): await _requestsToUsers.AnswerToRequest(callBackDto.Id, callBackDto.Action, ct); break;
 
                         default: _logger.LogInformation($"Нет подходящего обработчика в CallbackBotHandler.HandleUpdateAsync для {Text}"); break;
                     }
@@ -81,6 +84,8 @@ namespace Millionaire.TelegramBot.Handlers
             }
             
         }
+
+        
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
         {

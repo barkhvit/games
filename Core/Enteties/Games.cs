@@ -17,5 +17,6 @@ namespace Millionaire.Core.Enteties
         public int FinishScore { get; set; } = 0;
         public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         public bool IsActive { get; set; } = true;
+        public int CountOfRound { get; set; } = 1;
     }
 }

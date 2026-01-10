@@ -13,5 +13,8 @@ namespace Millionaire.Core.DTOs
         //views
         public static string Show { get; } = nameof(Show);
 
+        //REQUESTS
+        public static string Go { get; } = nameof(Go);
+        public static string Stop { get; } = nameof(Stop);
     }
 }

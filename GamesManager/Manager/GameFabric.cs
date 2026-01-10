@@ -60,7 +60,7 @@ namespace Millionaire.GamesManager.Manager
                     var n = await _gamesService.AddAsync(game,ct);
 
                     //отправляем сообщение пользователю
-                    await _messageService.SendMessage(UserId, $"Игра {game.Name} создана.", ct);
+                    await _messageService.SendMessageAsync(UserId, $"Игра {game.Name} создана.", ct);
                 }
             }
             catch(Exception ex)

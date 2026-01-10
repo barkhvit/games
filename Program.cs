@@ -113,6 +113,10 @@ namespace Millionaire
             //GamesManager
             services.AddSingleton<GameSessionManager>();
             services.AddHostedService<GameSessionManager>();
+
+            services.AddSingleton<RequestsToUsers>();
+            services.AddHostedService<RequestsToUsers>();
+
             services.AddTransient<GameSession>();
             services.AddScoped<GameFabric>();
 

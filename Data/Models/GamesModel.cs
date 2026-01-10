@@ -18,11 +18,9 @@ namespace Millionaire.Data.Models
         [Column("finishscore")] public int FinishScore { get; set; } = 0;
         [Column("createat")] public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         [Column("isactive")] public bool IsActive { get; set; } = true;
-
+        [Column("countofround")] public int CountOfRound {  get; set; } = 1;
 
         [Association(ThisKey = nameof(AdminUserId), OtherKey = nameof(UserModel.Id))]
         public UserModel User { get; set; } = null!;
     }
-
-    
 }

@@ -33,15 +33,27 @@ namespace Millionaire.BackGroundServices
             using var scope = _serviceProvider.CreateScope();
             var sessionManager = scope.ServiceProvider.GetRequiredService<GameSessionManager>();
 
-            //получаем и запускаем активные игры
-            var activeGames = await _gamesService.GetByActiveAsync(true, ct);
-
-            if (activeGames != null)
+            try
             {
-                foreach (var game in activeGames)
+                // Ждем сигнала остановки
+                while (!ct.IsCancellationRequested)
                 {
-                    sessionManager.StartNewSession(game);
+                    //получаем и запускаем активные игры
+                    var activeGames = await _gamesService.GetByActiveAsync(true, ct);
+
+                    if (activeGames != null)
+                    {
+                        foreach (var game in activeGames)
+                        {
+                            sessionManager.StartNewSession(game);
+                        }
+                    }
+                    await Task.Delay(2000, ct);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInformation(ex, $"ошибка в {_logger.ToString()}");
             }
         }
     }

@@ -13,6 +13,10 @@ namespace Millionaire.Core.DTOs
         public static string GamesMainMenuView { get; internal set; } = nameof(GamesMainMenuView);
         public static string CreateGameCommands { get; internal set; } = nameof(CreateGameCommands);
 
+        // REQUESTS
+        public static string Request { get; internal set; } = nameof(Request);
+
+
         //MONOPOLY
         public static string MonopolyMainMenuView { get; internal set; } = nameof(MonopolyMainMenuView);
         

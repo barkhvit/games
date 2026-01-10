@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Millionaire.Core.Enteties;
+using Millionaire.Core.Interfaces;
 using Millionaire.GamesManager.Enums;
+using Millionaire.GamesManager.GameRound;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,35 +17,44 @@ namespace Millionaire.GamesManager.Manager
         private readonly ILogger<GameSession> _logger;
         private readonly Guid _id;
         private readonly CancellationTokenSource _cts;
-        private readonly enNamesOfGames _namesOfGames;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly IGameRound _gameRound;
+        private readonly Games _games;
 
-        public GameSession(Games games, ILogger<GameSession> logger)
+        public GameSession(Games games, ILogger<GameSession> logger, IServiceProvider serviceProvider)
         {
+            _games = games;
             _id = games.Id;
             _logger = logger;
             _cts = new CancellationTokenSource();
-            _namesOfGames = games.TypeOfGame;
+            _serviceProvider = serviceProvider;
+
+            _gameRound = _games.TypeOfGame switch
+            {
+                enNamesOfGames.Monopoly => new MonopolyGameRound(_serviceProvider),
+                enNamesOfGames.SeaBattle => new SeaBattleGameRound(_serviceProvider),
+                _ => new MonopolyGameRound(_serviceProvider)
+            };
         }
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken ct)
         {
-            _logger.LogInformation($"Игра {_id} началась");
+            _logger.LogInformation($"Игра |{_games.Name}| началась. ID-{_id}");
 
             try
             {
                 // Основной игровой цикл
-                while (!stoppingToken.IsCancellationRequested &&
-                       !_cts.Token.IsCancellationRequested)
+                while (!ct.IsCancellationRequested && !_cts.Token.IsCancellationRequested)
                 {
-                    // Логика игры
-                    await PlayGameRoundAsync();
+                    // Раунд игры (логика)
+                    await _gameRound.PlayGameRoundAsync(_id, _cts.Token);
 
                     // Проверка условий окончания игры
-                    if (IsGameFinished())
+                    var gameIsFinished = await _gameRound.IsGameFinished(_id, _cts.Token);
+                    if (gameIsFinished)
                     {
                         break;
                     }
-
-                    await Task.Delay(100, stoppingToken); // Пауза между ходами
+                    await Task.Delay(100, ct); // Пауза между ходами
                 }
             }
             catch
@@ -55,18 +66,6 @@ namespace Millionaire.GamesManager.Manager
                 _logger.LogInformation($"Сессия {_id} завершена", _id);
                 await CleanupAsync();
             }
-        }
-
-        private async Task PlayGameRoundAsync()
-        {
-            // Ваша игровая логика
-            await Task.Delay(50); // Пример
-        }
-
-        private bool IsGameFinished()
-        {
-            // Проверка условий окончания игры
-            return false; // Пример
         }
 
         private async Task CleanupAsync()

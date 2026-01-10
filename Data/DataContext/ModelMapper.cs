@@ -22,7 +22,8 @@ namespace Millionaire.Data.DataContext
                 TypeOfGame = Enum.Parse<enNamesOfGames>(model.TypeOfGame),
                 FinishScore = model.FinishScore,
                 CreateAt = model.CreateAt,
-                IsActive = model.IsActive
+                IsActive = model.IsActive,
+                CountOfRound = model.CountOfRound
             };
         }
 
@@ -36,7 +37,8 @@ namespace Millionaire.Data.DataContext
                 TypeOfGame = entity.TypeOfGame.ToString(),
                 FinishScore = entity.FinishScore,
                 CreateAt = entity.CreateAt,
-                IsActive = entity.IsActive
+                IsActive = entity.IsActive,
+                CountOfRound = entity.CountOfRound
             };
         }
 

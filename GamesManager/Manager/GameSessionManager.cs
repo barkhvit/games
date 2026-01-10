@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Millionaire.Core.Enteties;
+using Millionaire.Core.Interfaces;
 using Millionaire.GamesManager.Enums;
 using System;
 using System.Collections.Concurrent;
@@ -17,12 +18,15 @@ namespace Millionaire.GamesManager.Manager
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<GameSessionManager> _logger;
         private readonly ConcurrentDictionary<Guid, (GameSession session, Task task)> _sessions;
+        private readonly IGamesService _gamesService;
         
-        public GameSessionManager(IServiceProvider serviceProvider,ILogger<GameSessionManager> logger)
+        public GameSessionManager(IServiceProvider serviceProvider,ILogger<GameSessionManager> logger,
+            IGamesService gamesService)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
             _sessions = new ConcurrentDictionary<Guid, (GameSession, Task)>();
+            _gamesService = gamesService;
         }
         public async Task StartAsync(CancellationToken cancellationToken)
         {
@@ -45,15 +49,15 @@ namespace Millionaire.GamesManager.Manager
             if (!_sessions.TryGetValue(games.Id, out var sessionData))
             {
                 //если нет, то создаем сессию
-                var session = new GameSession(games,
-                    _serviceProvider.GetRequiredService<ILogger<GameSession>>());
+                var session = new GameSession(games, _serviceProvider.GetRequiredService<ILogger<GameSession>>()
+                    , _serviceProvider);
 
                 // Запускаем сессию в фоновом режиме
                 var sessionTask = session.StartAsync(CancellationToken.None);
 
                 //добавляется в словарь
                 _sessions.TryAdd(games.Id, (session, sessionTask));
-                _logger.LogInformation($"Создана новая игровая сессия: {games.Id}");
+                _logger.LogInformation($"Добавлена в память новая игровая сессия: {games.Name}");
             }
             return games.Id;
         }

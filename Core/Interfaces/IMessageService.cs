@@ -9,6 +9,7 @@ namespace Millionaire.Core.Interfaces
 {
     public interface IMessageService
     {
-        Task SendMessage(Guid Id, string Text, CancellationToken ct);
+        Task SendMessageAsync(Guid Id, string Text, CancellationToken ct);
+        Task SendRequestAsync(Guid adminId, Guid key, CancellationToken ct);
     }
 }
